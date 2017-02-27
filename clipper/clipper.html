@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script src="jquery.min.js"></script>
+
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+
+			.clipper-main {
+				position: relative;
+				top: 100px;
+				left: 100px;
+				width: 200px;
+				height: 200px;
+				background: green;
+				overflow: hidden;
+				cursor: crosshair;
+				text-align: center;
+			}
+			
+			
+			.clipper-tracker {
+				position: absolute;
+				width: 100px; 
+				height: 100px;
+				border: 1px dotted #fff;
+				cursor: move;
+			}
+			
+			.clipper-handle {
+				position: absolute;
+				width: 6px;
+				height: 6px;
+				border: 1px solid red;
+			}
+			
+			.clipper-handle-tl {
+				top: -3px;
+				left: -3px;
+				cursor: nwse-resize;
+			}
+			
+			.clipper-handle-tm {
+				top: -3px;
+				left: 50%;
+				margin-left: -3px;
+				cursor: n-resize;
+			}
+			
+			.clipper-handle-tr {
+				top: -3px;
+				right: -3px;
+				cursor: nesw-resize;
+			}
+			
+			.clipper-handle-rm {
+				top: 50%;
+				right: -3px;
+				margin-top: -3px;
+				cursor: e-resize;
+			}
+			
+			.clipper-handle-br {
+				bottom: -3px;
+				right: -3px;
+				cursor: nwse-resize;
+			}
+			
+			.clipper-handle-bm {
+				bottom: -3px;
+				left: 50%;
+				margin-left: -3px;
+				cursor: n-resize;
+			}
+			
+			.clipper-handle-bl {
+				bottom: -3px;
+				left: -3px;
+				cursor: nesw-resize;
+			}
+			
+			.clipper-handle-lm {
+				top: 50%;
+				left: -3px;
+				margin-top: -3px;
+				cursor: e-resize;
+			}
+			
+			.clipper-preview{
+				position:absolute;
+				width:100px;
+				height:100px;
+				left:400px;
+				border:1px solid green;
+			}
+			
+		</style>
+	</head>
+
+	<body>
+		<div class='clipper'>
+			<div class="clipper-main">
+				<div class="clipper-holder">
+					<div class="clipper-tracker">
+						<span class="clipper-handle clipper-handle-tl" data-handle="tl"></span>
+						<span class="clipper-handle clipper-handle-tm" data-handle="tm"></span>
+						<span class="clipper-handle clipper-handle-tr" data-handle="tr"></span>
+						<span class="clipper-handle clipper-handle-rm" data-handle="rm"></span>
+						<span class="clipper-handle clipper-handle-br" data-handle="br"></span>
+						<span class="clipper-handle clipper-handle-bm" data-handle="bm"></span>
+						<span class="clipper-handle clipper-handle-bl" data-handle="bl"></span>
+						<span class="clipper-handle clipper-handle-lm" data-handle="lm"></span>
+						<div class="clipper-show"></div>
+					</div>
+				</div>
+				<img src="koala.jpg" class='clip-img' />
+			</div>
+			<div class="clipper-preview"></div>
+		</div>
+	</body>
+	<script>
+		(function($) {
+			var Clipper = function(clipper) {
+				var self = this;
+				this.clipper = clipper;
+				this.clipperMain=this.clipper.find('.clipper-main');
+				this.preview=this.clipper.find('.clipper-preview');
+				this.clipImg=this.clipper.find('.clip-img');
+				this.clipHolder=this.clipper.find('.clipper-holder')
+				this.tracker = this.clipHolder.find('.clipper-tracker');
+				this.handles = this.tracker.find('.clipper-handle'); 
+				this.trackerShow=this.tracker.find('.clipper-show ')
+				
+
+				this.handle = null;
+				this.clipWrapW=this.clipperMain.width();
+				this.clipWrapH=this.clipperMain.height();
+				this.trackerW = this.tracker.width();
+				this.trackerH = this.tracker.height();
+				
+				//保存图片展示区各属性值
+				this.imgSrc=this.clipImg.attr('src');
+				this.clipW = this.clipImg.width();
+				this.clipH = this.clipImg.height();
+				this.clipLeft=(this.clipWrapW-this.clipW )/2;
+				this.clipTop=(this.clipWrapH-this.clipH)/2;
+
+				
+				this.startX = null;
+				this.startY = null;
+				this.dragRatio_w_h = this.clipWrapW / this.clipWrapH;
+				this.lMax = this.clipW - this.trackerW;
+				this.tMax = this.clipH - this.trackerH;
+				this._isMove = false;
+				this._isDrag = false;
+				this._isRest = false;
+
+				//css属性
+				this.cssOpts = {};//拖拽移动选框css
+				this.clipCss={}; //图片样式css
+				
+				this.setClipImgUI();
+				
+				this.initPos(); //预览框样式初始化
+				
+				this.dragMove(); //移动预览框
+				this.dragStretch(); //拖拽拉伸预览框
+				this.drawTracker(); //重新选取预览框
+
+			};
+
+			Clipper.prototype = {
+				setClipImgUI:function(){//源图片样式
+					var self=this;
+					var imgRatio_w_h=this.clipW / this.clipH;
+					if(imgRatio_w_h>this.dragRatio_w_h){
+						this.clipImg.css({
+							width:'100%',
+						}) 
+					} else {
+						this.clipImg.css({
+							height:'100%',
+						})
+					}
+					
+					this.clipW=this.clipImg.width();
+					this.clipH=this.clipImg.height();	
+					this.clipLeft=(this.clipWrapW-this.clipW)/2;
+					this.clipTop=(this.clipWrapH-this.clipH)/2;
+					
+					this.clipCss={
+						position:'absolute',
+						left:this.clipLeft,
+						top:this.clipTop,
+						width:this.clipW,
+						height:this.clipH,
+					}
+					this.clipImg.css($.extend(this.clipCss,{'z-index':0,'opacity':'0.6'}));
+				},
+			
+				initPos: function() {
+					//控制拖拽区域的UI
+					this.clipHolder.css($.extend(this.clipCss,{'z-index':1,'opacity':'1'}));
+					var l = (this.clipW - this.trackerW) / 2;
+					var t = (this.clipH - this.trackerH) / 2;
+					this.tracker.css({
+						left: l, 
+						top: t, 
+					});
+					this.trackerShow.css({ 
+						position:'absolute',
+						zIndex:-1,
+						width:'100%',
+						height:'100%',
+						background:'url('+this.imgSrc+')'+' no-repeat',  
+						backgroundSize:this.clipCss.width+'px '+this.clipCss.height+'px',
+						backgroundPosition: -l + 'px ' + -t + 'px'
+					})
+					
+					 this.preview.css({
+					 	background:'url('+this.imgSrc+')',
+					 	backgroundRepeat: 'no-repeat',
+					 	backgroundSize:this.clipCss.width+'px '+this.clipCss.height+'px',
+						backgroundPosition: -l + 'px ' + -t + 'px'
+					 });
+				},
+				
+				updatePreveiwUI:function(left,top){ //left:编辑拖拽选区框左偏移值，top:编辑拖拽选区框上偏移值
+					var ratio=this.tracker.width()/this.preview.width(); 
+					var bgSizeW=this.clipW/ratio;
+					var bgSizeH=this.clipH/ratio; 
+					var bgPosL=-left*bgSizeW/this.clipW;  
+					var bgPosT=-top*bgSizeH/this.clipH; 
+
+					this.preview.css({
+					 	backgroundSize:bgSizeW+'px '+bgSizeH+'px', 
+						backgroundPosition: bgPosL + 'px ' +  bgPosT + 'px'
+					 });
+				},
+				getDragInit: function(e) { //当鼠标按下时， 保存当前对象及鼠标的当前值
+					this.startX = e.pageX;
+					this.startY = e.pageY;
+					this.trackerW = this.tracker.width();
+					this.trackerH = this.tracker.height();
+					this.cssOpts.left = this.tracker.position().left;
+					this.cssOpts.top = this.tracker.position().top;
+				},
+				getDragMoveInit: function(e) {
+					e.stopPropagation();
+					this.getDragInit(e);
+					this.lMax = this.clipW - this.trackerW;
+					this.tMax = this.clipH - this.trackerH;
+					this._isMove = true;
+					this._isDrag = false;
+				},
+				getDragStretchInit: function(e) {
+					e.stopPropagation();
+					this.getDragInit(e);
+					this.cssOpts.right = this.clipW - this.trackerW - this.cssOpts.left;
+					this.cssOpts.bottom = this.clipH - this.trackerH - this.cssOpts.top;
+					this._isMove = false;
+					this._isDrag = true;
+				},
+				getRestTracker: function(e) {
+					this.startX = e.pageX;
+					this.startY = e.pageY;
+					this._isRest=true;
+					this.tracker.css({
+						display:'none',
+						width:0,
+						height:0, 
+					});
+				},
+				
+				drawTrackerUI:function(e){ 
+					var left=this.startX-this.clipHolder.offset().left,
+					    top=this.startY-this.clipHolder.offset().top,
+					    width=e.pageX-this.startX,
+					    height=width/this.dragRatio_w_h;
+					
+					
+					var max_h = this.clipH - top,
+						max_w = this.clipW - left;
+					
+					if(height > max_h) {
+						height = max_h;
+						width = height * this.dragRatio_w_h;
+					} 
+					if(width > max_w) {
+						width = max_w;
+						height = max_w / this.dragRatio_w_h; 
+					}
+					this.handles.detach();
+					this.tracker.css({
+						display:'block',
+						left:left,
+						top:top,
+						bottom:'initial',
+						right:'initial', 
+						width:width,
+						height:height,
+					});
+					this.trackerShow.css({
+						backgroundPosition: -left + 'px ' + -top + 'px'
+					});
+					this.updatePreveiwUI(left,top); 
+				},
+				dragMoveUI: function(e) {
+					var left = e.pageX - this.startX + this.cssOpts.left;
+					var top = e.pageY - this.startY + this.cssOpts.top;
+
+					if(left < 0) {
+						left = 0;
+					} else if(left > this.lMax) {
+						left = this.lMax;
+					}
+
+					if(top < 0) {
+						top = 0;
+					} else if(top > this.tMax) {
+						top = this.tMax;
+					}
+					this.tracker.css({
+						left: left,
+						top: top,
+					});
+					this.trackerShow.css({
+						backgroundPosition: -left + 'px ' + -top + 'px'
+					})
+					this.updatePreveiwUI(left,top); 
+
+				},
+				dragStretchUI: function(e) {
+					var posCss = {};
+					var width, height, max_w, max_h,left,top,max_l,max_t,
+						min_w = 10,
+						min_h = 10;
+					
+					if(this.handle == 'tm' || this.handle == 'bm') {
+						height = e.pageY - this.startY + this.trackerH;
+						if(this.handle == 'tm') {
+							height = this.startY - e.pageY + this.trackerH;
+						}
+						width = height * this.dragRatio_w_h;
+					} else if(this.handle == 'lm' || this.handle == 'rm') {
+						width = e.pageX - this.startX + this.trackerW;
+						if(this.handle == 'lm') {
+							width = this.startX - e.pageX + this.trackerW;
+						}
+						height = width / this.dragRatio_w_h;
+					} else {
+						if(this.handle == 'tl' || this.handle == 'tr') {
+							height = this.startY - e.pageY + this.trackerH;
+							width = this.startX - e.pageX + this.trackerW;
+
+						} else if(this.handle == 'bl' || this.handle == 'br') {
+							height = e.pageY - this.startY + this.trackerH;
+							width = e.pageX - this.startX + this.trackerW;
+						}
+
+						width = height * this.dragRatio_w_h;
+						if(height > width) {
+							width = height * this.dragRatio_w_h;
+						} else if(height < width) {
+							height = width / this.dragRatio_w_h;
+						}
+					}
+					
+					//计算出选区的最大宽和值
+					max_h = this.clipH - this.cssOpts.top; 
+					max_w = this.clipW - this.cssOpts.left;
+					if(this.handle=='tl'){
+						max_h = this.clipH - this.cssOpts.bottom;
+						max_w = this.clipW - this.cssOpts.right;
+					} else if(this.handle=='tm' || this.handle=='tr'){
+						max_h = this.clipH - this.cssOpts.bottom;
+						max_w = this.clipW - this.cssOpts.left;
+					} else if(this.handle=='bl' || this.handle=='lm'){
+						max_h = this.clipH - this.cssOpts.top;
+						max_w = this.clipW - this.cssOpts.right;
+					}
+					
+					//计算出选区的最大宽和值
+					if(height > max_h) {
+						height = max_h;
+						width = height * this.dragRatio_w_h;
+					} else if(height < min_h) {
+						height = min_h;
+						width = height * this.dragRatio_w_h;
+					}
+					if(width > max_w) {
+						width = max_w;
+						height = max_w / this.dragRatio_w_h;
+					} else if(width < min_w) {
+						width = min_w;
+						height = min_w / this.dragRatio_w_h;
+					}
+					
+					
+					left=this.cssOpts.left;
+					top=this.cssOpts.top;
+					if(this.handle=='tl'){
+						left=this.cssOpts.left+this.trackerW-width;
+						top=this.cssOpts.top+this.trackerH-height;
+					} else if(this.handle=='tm' || this.handle=='tr'){
+						top=this.cssOpts.top+this.trackerH-height;
+					} else if(this.handle=='bl' || this.handle=='lm'){
+						left=this.cssOpts.left+this.trackerW-width;
+					}
+
+					this.tracker.css({
+						'width': width,
+						'height': height,
+						'left':left,
+						'top':top,
+					});
+
+					this.trackerShow.css({
+						backgroundPosition: -left + 'px ' + -top + 'px'
+					})
+					
+					this.updatePreveiwUI(left,top); 
+				},
+				dragMove: function() { //拖拽移动预览区域
+					var self = this;
+					this.tracker.on('mousedown', function(e) {
+						self.getDragMoveInit(e);
+					});
+					$(document).on('mousemove', function(e) {
+						if(self._isMove) {
+							self.dragMoveUI(e);
+						}
+					});
+					$(document).on('mouseup', function(e) {
+						self._isMove = false;
+					});
+				},
+				dragStretch: function() { //拖拽拉伸预览区域
+					var self = this;
+					this.handles.each(function() {
+						$(this).on('mousedown', function(e) {
+							self.getDragStretchInit(e);
+							self.handle = $.trim($(this).data('handle')); //标识各控制点
+							
+						});
+					});
+					$(document).on('mousemove', function(e) {
+						if(self._isDrag) {
+							self.dragStretchUI(e);
+						}
+					});
+					$(document).on('mouseup', function(e) {
+						self._isDrag = false;
+					});
+				},
+				drawTracker: function() { //重新选择预览区域
+					var self = this;
+					this.clipHolder.on('mousedown', function(e) {
+						self.getRestTracker(e);
+					});
+					$(document).on('mousemove',function(e){
+						if(self._isRest){
+							self.drawTrackerUI(e);  
+						}
+					});
+					$(document).on('mouseup',function(e){
+						self._isRest=false; 
+						self.handles.each(function(){
+							$(this).appendTo(self.tracker);
+						})
+					});
+					
+				},
+			};
+
+			window['Clipper'] = Clipper;
+		})(window.jQuery);
+		
+		$(function(){
+			var clipper = new Clipper($('.clipper'));
+		})
+	</script>
+
+</html>

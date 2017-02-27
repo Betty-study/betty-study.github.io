@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script src="jquery.min.js"></script>
+		<style>
+			.crop{}
+			.crop-main{position:relative;}
+			.clipper-tracker{position:absolute;}
+		</style>
+	</head>
+	<body>
+	</body>
+	<script>
+		;(function($){
+			var Crop=function(opts){
+				this.boundingBox=null;//最外层容器
+				this.handlers={};
+				
+				this.opts={
+					'width':400,
+					'height':400,
+					'ratio_wh':1,
+					'trackerW':100,
+					'imgSrc':'koala.jpg',
+				}
+				
+				this.rend();
+			};
+			Crop.prototype={
+				//自定义事件
+				on:function(type,handle){//添加自定义事件
+					if(typeof this.handlers[type]=='undefined'){
+						this.handlers[type]=[];
+					}
+					this.handlers[type].push(handle);
+					return this //链式调用
+				},
+				fire:function(type,data){//执行自定义事件
+					if(this.handlers[type] instanceof Array){
+						this.handlers[type].each(function(){
+							$(this)(data);
+						});
+					}
+				},
+				//方法：添加DOM节点
+				rendUI:function(){
+					this.boundingBox=$('<div class="crop"></div>');
+					this.boundingBox.appendTo('body');
+					this.cropMain=$('<div class="crop-main"></div>');//图片预览主容器
+					this.cropPreview=$('<div class="crop-preview"></div>'); //剪切预览区
+					this.cropMain.appendTo(this.boundingBox);
+					this.cropPreview.appendTo(this.boundingBox);
+					this.cropImg=$('<img src="'+this.opts.imgSrc+'" class="clip-img" />');//原始图片
+					this.cropImg.appendTo(this.cropMain);
+                    this.cropHolder=$('<div class="clipper-holder"></div>'); //剪切操作区
+                    this.cropHolder.appendTo(this.cropMain);
+                    this.cropTracker=$('<div class="clipper-tracker"></div>'); //图片剪切追踪框
+                    this.cropTracker.appendTo(this.cropHolder);
+                    this.cropHandles=$('<span class="clipper-handle clipper-handle-tl" data-handle="tl"></span>'+
+										'<span class="clipper-handle clipper-handle-tm" data-handle="tm"></span>'+
+										'<span class="clipper-handle clipper-handle-tr" data-handle="tr"></span>'+
+										'<span class="clipper-handle clipper-handle-rm" data-handle="rm"></span>'+
+										'<span class="clipper-handle clipper-handle-br" data-handle="br"></span>'+
+										'<span class="clipper-handle clipper-handle-bm" data-handle="bm"></span>'+
+										'<span class="clipper-handle clipper-handle-bl" data-handle="bl"></span>'+
+										'<span class="clipper-handle clipper-handle-lm" data-handle="lm"></span>');//拖拽拉伸控制点
+					this.cropHandles.appendTo(this.cropTracker); 
+					this.cropShow=$('<div></div>') //选区显示部分
+					this.cropShow.appendTo(this.cropTracker); 
+					console.log(this.cropImg.width()); 
+				},
+				//方法：监听事件
+				bindUI:function(){
+				},
+				//方法：初始化组件属性
+				syncUI:function(){
+					this.cropMain.css({
+						'width':this.opts.width,
+						'height':this.opts.height
+					});
+					this.cropTracker.css({
+						'width':this.opts.trackerW,
+						'height':this.opts.trackerW*this.opts.ratio_wh,
+						'left':(this.opts.width-this.opts.trackerW)/2,
+						'top':(this.opts.height-this.cropTracker.height())/2
+					})
+					this.cropImg.css({
+						//'position':'absolute',
+						//'left':left,
+						//'top':top, 
+					});
+					
+					console.log(this.cropImg.width());
+					this.cropImg.on('load', function() {
+						console.log($(this).width());
+					});
+				},
+				//方法：渲染组件
+				rend:function(){
+					this.rendUI();
+					this.bindUI();
+					this.syncUI();
+				}
+			};
+			window['Crop']=Crop;
+		})(window.jQuery);
+		
+		$(function(){
+			var jcrop=new Crop();
+			
+		});
+	</script>
+</html>
