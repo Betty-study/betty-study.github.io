@@ -11,8 +11,11 @@
 	</body>
 	<script>
 		$(function(){
-			var jcrop=new Crop();
-			
+			var jcrop=new Crop({
+				'width': 300,
+				'height': 300,
+				'trackerW': 100,
+			});
 		});
 	</script>
 </html>

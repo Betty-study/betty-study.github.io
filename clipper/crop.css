@@ -4,6 +4,7 @@
 
 .crop-main {
 	position: relative;
+	display: inline-block;
 	background: green;
 }
 
@@ -11,7 +12,10 @@
 	position: absolute;
 	border: 1px dotted #ddd;
 }
-
+.crop-preview{
+	overflow: hidden;
+	display: inline-block;
+}
 .crop-handle {
 	position: absolute;
 	width: 8px;

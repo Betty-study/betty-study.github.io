@@ -7,7 +7,6 @@
 		this.opts = {
 			'width': 400,
 			'height': 400,
-			//'ratio_wh': 1,
 			'trackerW': 100,
 			'imgSrc': 'koala.jpg',
 		}
@@ -16,6 +15,7 @@
 		this.rend();
 	};
 	Crop.prototype = {
+		
 		//自定义事件
 		on: function(type, handle) { //添加自定义事件
 			if(typeof this.handlers[type] == 'undefined') {
@@ -57,10 +57,7 @@
 			this.cropShow = $('<div></div>') //选区显示部分
 			this.cropShow.appendTo(this.cropTracker);
 		},
-		//方法：监听事件
-		bindUI: function() {
-			
-		},
+		
 		//方法：初始化组件属性
 		syncUI: function() {
 			var that = this;
@@ -72,7 +69,8 @@
 
 			//图片加载完后执行					
 			this.cropImg.on('load', function() {
-				if($(this).width() / $(this).height < ratio_wh) {
+				var src=$(this).attr('src');
+				if($(this).width() / $(this).height < that._getRatio()) {
 					$(this).height('100%');
 				} else {
 					$(this).width('100%');
@@ -86,6 +84,7 @@
 					'position': 'absolute',
 					'left': left,
 					'top': top,
+					'opacity':0.6,
 				});
 
 				that.cropHolder.css({
@@ -95,21 +94,118 @@
 					'left': left,
 					'top': top,
 				});
-				var tracker_h = that.opts.trackerW * ratio_wh;
+				var tracker_h = that.opts.trackerW / that._getRatio(),
+					offset_l=(width - that.opts.trackerW) / 2, //追踪选择框左偏移值
+					offset_t=(height - tracker_h) / 2;
 				that.cropTracker.css({
 					'width': that.opts.trackerW,
 					'height': tracker_h,
-					'left': (width - that.opts.trackerW) / 2,
-					'top': (height - tracker_h) / 2,
+					'left': offset_l,
+					'top': offset_t,
+				});
+				that.cropShow.css({ 
+					'height':tracker_h,
+					'background':'url('+src+')  no-repeat',
+					'background-size': width + 'px '+ height+'px', //多个值需加单位
+					'background-position':-offset_l +'px '+ -offset_t+'px', 
+					'overflow':'hidden',
+				});
+				that.cropPreview.css({
+					'width': that.opts.trackerW,
+					'height':tracker_h,
+					'border':'1px solid #ddd',
+					'background':'url('+src+')  no-repeat',
+					'background-size': width + 'px '+ height+'px', //多个值需加单位
+					'background-position':-offset_l +'px '+ -offset_t+'px', 
 				});
 			});
+			
+		},
+		//方法：监听事件
+		bindUI: function() {
+			var that=this;
+			this.cropTracker.on('mousedown',function(e){
+				that.mousedownMove(e);
+			});
+			$(document).on('mousemove',function(e){
+				that.mouseMove(e);
+			}).on('mouseup',function(){
+				that._isMove=false;
+			});
+			
 		},
 		//方法：渲染组件
 		rend: function() {
 			this.rendUI();
-			this.bindUI();
 			this.syncUI();
-		}
+			this.bindUI();
+		},
+		
+		_getRatio:function(){
+			return this.opts.width/this.opts.height;
+		},
+		_getTrackerHeight:function(){
+			return this.cropTracker.width() / this._getRatio();
+		},
+		
+		updatePreviewUI:function(l,t){
+			var ratio=this.cropTracker.width() / this.cropPreview.width();
+			var sizeW=this.cropTracker.width() / ratio,
+				sizeH=this._getTrackerHeight() / ratio,
+				posL=-l*sizeW/this.cropImg.width(),
+				posT=-t*sizeH/this.cropImg.height();
+				
+			this.cropPreview.css({
+				'background-size': sizeW+ 'px '+ sizeH+'px', 
+				'background-position':posL +'px '+ posT+'px'
+			});
+		},
+		_mousedown:function(e){
+			this.startX=e.pageX;
+			this.startY=e.pageY;
+			this.posL=this.cropTracker.position().left;
+			this.posT=this.cropTracker.position().top;
+		},
+		mousedownMove:function(e){
+			this._mousedown(e);
+			this._isMove=true;
+		},
+		updateMoveUI:function(e){
+			var left=e.pageX-this.startX+this.posL,
+				top=e.pageY-this.startY+this.posT;
+			//选框活动范围
+			var maxL=this.cropImg.width()-this.cropTracker.width(),
+				maxT=this.cropImg.height()-this.cropTracker.height();
+				
+				left=left>0?(left>maxL?maxL:left):0;
+				top=top>0?(top>maxT?maxT:top):0;
+				
+				this.cropTracker.css({
+						'left':left,
+						'top':top
+				});
+				this.cropShow.css({
+					'background-position':-left +'px '+ -top+'px', 
+				});
+				this.updatePreviewUI(left,top);
+				
+		},
+		mouseMove:function(e){
+			if(this._isMove){
+				this.updateMoveUI(e);
+			}
+		},
+		_mousedownStretch:function(e){
+			
+		},
+		
+		stretch:function(e){
+			
+		},
+		redraw:function(e){
+			
+		},
+	
 	};
 	window['Crop'] = Crop;
 })(window.jQuery);
