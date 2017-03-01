@@ -339,7 +339,7 @@
 				},
 				dragStretchUI: function(e) {
 					var posCss = {};
-					var width, height, max_w, max_h,left,top,max_l,max_t,
+					var width, height, max_w, max_h,left,top,
 						min_w = 10,
 						min_h = 10;
 					
@@ -448,7 +448,6 @@
 						$(this).on('mousedown', function(e) {
 							self.getDragStretchInit(e);
 							self.handle = $.trim($(this).data('handle')); //标识各控制点
-							
 						});
 					});
 					$(document).on('mousemove', function(e) {

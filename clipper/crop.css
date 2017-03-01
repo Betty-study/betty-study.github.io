@@ -1,7 +1,9 @@
 * {
 	box-sizing: border-box;
 }
-
+.crop{
+	margin-left:200px;
+}
 .crop-main {
 	position: relative;
 	display: inline-block;
