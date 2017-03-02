@@ -228,6 +228,9 @@
 				width:0,
 				height:0, 
 			});
+			this.cropImg.css({
+				'opacity':1, 
+			}); 
 		},
 
 		updateStrectUI: function(e) {
@@ -349,8 +352,10 @@
 					});
 					this.cropShow.css({
 						backgroundPosition: -left + 'px ' + -top + 'px'
-					})
-		
+					});
+					this.cropImg.css({
+						'opacity':0.6, 
+					}); 
 					this.updatePreviewUI(left, top);
 		},
 		updateMoveUI: function(e) {
