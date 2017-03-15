@@ -1,0 +1,6 @@
+请求方法：
+get post put delete head trace options ...
+
+状态吗：
+1xx 2xx(200) 3xx 4xx(400,401,403,404) 5xx(500 503)
+

@@ -1,0 +1,117 @@
+对象：属性是无序的， 每个属性都有一个字符串key和对应的value
+
+1.对象每个属性有它的属性标签及：writable, enumerable， configurable, value , get/set方法
+每个对象还有自己的原型 
+[[proto]]标签; 
+[[class]]表示属于哪一个种类的标签
+[[extendsible]]表示这个对象是否允许继续添加属性
+
+2.创建对象方法：
+1.
+var obj={}
+2.
+function foo(){
+}
+
+var obj=new foo();
+
+3. 
+var obj=Object.create({x:1}); obj=>{x:1}=>object.prototype;
+如果传入的是null的话，对象原型直接指向null, 没有属性和方法
+e.g
+var obj=Object.create(null); obj=>null
+obj.toString// undefined
+
+
+//////////////属性的操作
+
+属性的删除
+var person={age:28, title:'ea'};
+delete person.age;
+delet person['title'];
+person.age; //undefined
+delete person.age; //false;
+
+var descriptor=Object.getOwnPropertyDescriptor(Object,'prototype'); //获得属性标签
+descriptor.configurable://false
+
+属性检测
+var cat=new Object
+cat.legs=4;
+cat.name='hele';
+
+'legs' in cat; //true
+'abc' in cat; //false 检测不存在的属性返回false
+'toString' in cat; //true, 继承自原型链上的属性
+
+cat.hasOwnProperty('legs');//true
+cat.propertyIsEnumerable('legs'); //true
+cat.propertyIsEnumerable('toString'); //false
+
+Object.defineProperty(cat,'price',{enumerable:false, value;1000}) //改写属性标签值
+
+属性枚举
+
+
+getter/setter 方法读写属性
+var man={
+	name:'betty',
+	$age:null, //$打头可以不暴露出来
+	get age(){ //get 关键词开头 而不是：
+		if(this.$age==undefined){
+			return new Date().getFullYear()-1988;
+		} else {
+			return this.$age;
+		}
+	},
+	set age(val){ //set 关键词开头 而不是':'
+		val =+ val
+		if(!isNaN(val) && val>0 && val<150){
+			this.$age=+val;
+		} else {
+			throw new Error('Incorrect val=' +val);
+		}
+	}
+};
+
+console.log(man.age);//27
+man.age=100;
+console.log(man.age)://100;
+man.age='abe';//Incorrect val=NaN
+
+console.log(man.age);//29
+man.age=100;// Age can't be set to 100
+console.log(man.age);//still 27
+
+get/set与原型链
+
+
+///////////////属性标签
+//获得属性标签
+Object.getOwnPropertyDescriptor({pro:true},'pro');
+//Object{value:true, writabe:true, enumerable:true, configurable:true}
+Object.getOwnPropertyDescriptor({pro:true},'a');//undefined
+
+//设置属性标签
+var person={};
+Object.defineProperty(person,'name',{
+	configurable:false,
+	writable:false,
+	enumerable:true,
+	value:'betty zhong'
+});
+
+person.name;// betty zhong
+person.name=miao;
+person.name;// still Bosn Ma  原因：writable为false， 不能被改写
+delete person.name ;// false 原因：configurable为fasle， 不能被删除
+
+创建新的属性
+Object.defineProperty(peron,'type',{
+	configurable:true,
+	writable:true,
+	enumerable:false,
+	value:'object'
+});
+
+Object.Keys(person);//['name'] 没有type 原因：enumerable为false，是不可枚举的

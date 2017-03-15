@@ -1,0 +1,48 @@
+表达式：原始表达式，初始化表达式，函数表达式，属性访问表达式，调用表达式，对象创建表达式
+运算符
+
+逗号表达式 (a,b):　var val=(1,2,3); //val = 3 取最后一个
+删除属性运算 delete；delete Obj.x
+var obj={x:1}
+obj.x; //1
+delete obj.x;
+obj.x; //undefined
+
+>ie9 defineProperty() 属性配置
+var obj={}
+Object.defineProperty(obj,'x',{
+	configurable: false, //值为true才能被delete 掉
+	value:1
+});\
+
+delete obj.x ; //false
+obj.x; // 1
+
+
+运算符 in 
+ window.x=1;
+ 'x' in window //true;
+ 
+运算符 instanceof(基于原型链), typeof(原始数据类型，函数)；
+
+运算符 new
+function Foo(){}
+Foo.prototype.x=1;
+var obj=new Foo();
+obj.x;//1
+obj.hasOwnProperty('x');//false
+obj.__proto__.hasOwnProperty('x'); //true;
+
+运算符 this
+this; //window 
+var obj={
+	func:function(){return this};
+};
+obj.func();//obj;
+
+运算符 void  比较少见
+
+运算符优先级
+
+
+

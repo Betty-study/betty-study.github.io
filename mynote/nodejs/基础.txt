@@ -1,0 +1,24 @@
+//////////hello word////////////
+const http = require('http');
+
+const hostname = '127.0.0.1';
+const port = 3000;
+
+const server = http.createServer((req, res) => {
+  res.statusCode = 200; //代表成功
+  res.setHeader('Content-Type', 'text/plain'); //返回内容是纯文本
+  res.end('Hello World\n'); //输出内容
+});
+
+server.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
+
+
+/////////////命令中体验//////////
+下面代码在浏览器和nodejs中执行时执行环境不同， 浏览器 执行环境是window , nodejs 执行环境是global 
+var a=1;b=2; function add(){return a+b}; console.log(add()); //output 3
+
+//////////// URL //////////////
+
+

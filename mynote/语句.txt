@@ -1,0 +1,141 @@
+1.块语句 block；
+语法：{
+	语句1；
+	语句2；
+} 
+
+2. catch 
+
+try{
+	try{
+		throw new Error('oops')
+	}
+	finally{
+		console.log('finally');
+	}
+} catch (ex){
+	console.error('outer',ex.message);
+}
+
+// 'finally' 'outer' 'oops'
+抛出异常，因为异常没有在try中处理，所以会抛给 外面的catch去处理，在抛给外面catch处理前会先执行finally
+
+3.for..in 遍历对象
+var p;
+var obj{x:1,y:2}
+
+for(p in obj){
+
+}
+
+注：for...in 遍历存在的问题
+1.顺序是不确定的
+2.enumerable为false时不会出现
+3.for in对象属性时受原型链影响 如：当对象有其他的一些属性enumerable为true时也会被遍历
+
+
+4.with 可以修改当前作用域 js 严格模式下已经禁用了
+
+with({x:1}){
+  console.log(x);
+}
+
+///////////// 严格模式   /////////////////////////////
+
+5.严格模式  提供更强的错误检查，并增强了安全性
+严格模式声明
+function func(){
+	'use strict';
+}
+
+'use strict';
+function(){
+
+}
+
+arguments变为参数的静态副本
+//一般模式
+!function(a){
+	arguments[0]=100;
+	console.log(a);
+}(1);
+
+100
+
+1=>100, 不传=>undefined
+
+//严格模式
+!function(a){
+'use strict'
+	arguments[0]=100;
+	console.log(a);
+}(1);
+
+
+1=>1, 不传=>1 arguments和形参a 是没有绑定关系的，所以传与不传a都是 1
+
+!function(a){
+'use strict'
+	arguments[0].x=100;
+	console.log(a.x);
+}({x:});
+
+但是如果传入对象的话，a虽不受影响，但是可以改变对象的属性值。
+
+delete参数，函数名报错
+
+//一般模式
+！function(a){
+	console.log(delete a);
+}(1);
+
+ 返回 false
+
+//严格模式
+！function(a){
+	'use strict'
+	console.log(delete a);
+}(1);
+
+SyntaxError
+
+delete不可配置的属性报错
+//一般模式
+！function(a){
+	var obj={};
+	Object.defineProperty(obj,'a',{
+		configurable:false
+	});
+	console.log(delete obj.a);
+	console.log(delete a);
+}(1);
+
+返回 false 删除失败
+
+//严格模式
+！function(a){
+   'use strict'
+	var obj={};
+	Object.defineProperty(obj,'a',{
+		configurable:false
+	});
+	console.log(delete obj.a);
+	console.log(delete a);
+}(1);
+
+TypeError
+
+严格模式下对象字面量重复属性名会报错  e.g(x:1,x:2)
+严格模式下禁止八进制字面量 e.g console.log(0123) SyntaxError
+
+eval, arguments 变为关键字，不能作为变量，函数名；
+e.g function eval(){} SyntaxError
+
+严格模式下eval独立作用域  
+e.g :eval('var evalVal=2'); console.log(typeof evalVal) 返回undefined;
+
+一般函数调用时(不是对象的调用方法，也不使用apply/call/bind等修改this)this指向null,而不是全局对象
+若使用apply/call，当传入null或undefined时， this将指向null或undefined,而不是全局对象
+试图修改不可改写属性(writable=false),在不可扩展的对象上添加属性时报TypeError,而不是忽略
+arguments,caller,arguments,callee被禁用
+所有变量必须声明，赋值给未声明的变量报错，而不是隐式创建全局变量

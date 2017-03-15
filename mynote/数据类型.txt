@@ -1,0 +1,212 @@
+1.Js有6种数据类型 ： 
+特殊数据类型Object： Function, Array, Date ...
+原始数据类型：Number, String, boolean, null, undefine  
+
+2.隐式转换：
++ 和 -
+
+3.字符串=>数值  ：e.g '123'-0  // 123
+数值 =>字符串 ：e.g 123+'' // '123'
+
+4.=== 和  ==
+
+=== 先判断类型 ，类型不同，返回 false
+ 	类型相同：
+ 		null === null
+ 		undefined === undefined
+ 		NaN ≠ NaN
+ 		new Object ≠ new Object
+
+== 类型相同，同 ===
+         类型不同，尝试类型转换和比较：
+         null==undefined 相等
+         number== string 转 number 1=='1.0' // true
+         boolean==? 转 number 1== true // true
+         object==number | string 尝试对象转为基本类型  new String('hi') == 'hi' //true
+         其他： false
+
+5.包装对象
+
+e.g
+var str='string' 基本类型 (没有属性，和方法)
+var str= new String('string') 包装类型
+
+当对基本类型进行属性访问时，js会尝试将基本类型转换为包装类型对象， 访问问之后又将会自动自动销毁
+str.length //6 
+str.t=3; //基本类型不是对象，没有属性
+alert(a.t); //undefine;
+
+'str' => String Object
+123 => Number Object
+true => Boolean Object
+
+
+6.类型检测  
+typeof instanceof Object.prototype.toString constructor ducktype
+        
+a.最常用的是 typeof  对基本类型及function检测， 遇到null失效， 可以用 严格等于 '===' 进行检测
+typeof 100  'number'
+typeof true 'boolean'
+typeof function 'function'
+typeof(undefined) 'undefined'
+typeof new Object()  'object'
+typeof [1,2]   'object'
+typeof NaN   'number'
+typeof null 'object' //历史原因， 为了兼容
+
+b.instanceof 注： 不同Window或iframe间的对象类型检测不能使用 instanceof
+obj（对象） instanceof Object（函数对象函数构造器） 
+原理： 判断左操作数对象的原型链上是否有右边构造函数的prototype属性
+[1,2] instanceof Array === true
+new Object instanceof Array ===false
+
+c. Object.prototype.toString 
+Object.prototype.toString.apply([])==='[object Array]';
+Object.prototype.toString.apply(function(){})==='[object Function]'
+Object.prototype.toString.apply(null)==='[object Null]'
+Object.prototype.toString.apply(undefined)==='[object Undefined]'
+
+存在兼容性问题
+IE6/7/8 Object.prototype.toString.apply(null) 返回 '[object Object]';
+
+类型检测小结：
+typeof: 适合基本类型及function检测，遇到null失效
+[[Class]]:通过{}.toString拿到，适合内置对象和基本类型，遇到null 和 undefined 失效(IE6/7/8等返回[object, Object])
+instanceof:适合自定义对象，也可以用来检测原生对象，在不同的iframe和window间检测失效
+
+7.constructor 每一个
+注：constructor 是可以被改写的
+
+练习编程：
+请在index.html文件中，编写arraysSimilar函数，实现判断传入的两个数组是否相似。具体需求：
+
+1. 数组中的成员类型相同，顺序可以不同。例如[1, true] 与 [false, 2]是相似的。
+
+2. 数组的长度一致。
+
+3. 类型的判断范围，需要区分:String, Boolean, Number, undefined, null, 函数，日期, window.
+
+当以上全部满足，则返回"判定结果:通过"，否则返回"判定结果:不通过"。
+
+ <script type="text/javascript">   
+        /*
+         * param1 Array 
+         * param2 Array
+         * return true or false
+         */
+        function arraysSimilar(arr1, arr2){
+            //判断边界
+            if(!(arr1 instanceof Array) || !(arr2 instanceof Array)){
+                return false;
+            }
+            
+            //判断数组长度是否相等
+            if(arr1.length !== arr2.length) {
+                return false;
+            }
+            
+            var i=0,
+                len=arr1.length,
+                countMap1={},
+                countMap2={},
+                t1,t2,
+                TPYES=['string','boolean','number','undefined','null','function','date','window'];
+                
+            for(;i<len;i++){
+                t1=typeOf(arr1[i]);
+                t2=typeOf(arr2[i]);
+                
+                if(countMap1[t1]){
+                    countMap1[t1]++;
+                } else {
+                    countMap1[t1]=1;
+                }
+                
+                if(countMap2[t2]){
+                    countMap2[t2]++;
+                } else {
+                    countMap2[t2]=1;
+                }
+            }
+            
+            function typeOf(ele){
+              var r;
+              if(ele === null) r='null';
+              else if(ele instanceof Array) r='arry';
+              else if(ele === window) r='window';
+              else if(ele instanceof Date) r='date';
+              else r=typeof ele;
+              return r;
+            }
+            
+            for(i=0;i<TPYES.length;i++){
+                if(countMap1[TPYES[i]] !==countMap2[TPYES[i]]){
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+    </script>
+    
+    var result=function(){
+    //以下为多组测试数据
+            var cases=[{
+                    arr1:[1,true,null],
+                    arr2:[null,false,100],
+                    expect:true
+                },{
+                    arr1:[function(){},100],
+                    arr2:[100,{}],
+                    expect:false
+                },{
+                    arr1:[null,999],
+                    arr2:[{},444],
+                    expect:false
+                },{
+                    arr1:[window,1,true,new Date(),"hahaha",(function(){}),undefined],
+                    arr2:[undefined,(function(){}),"okokok",new Date(),false,2,window],
+                    expect:true
+                },{
+                    arr1:[new Date()],
+                    arr2:[{}],
+                    expect:false
+                },{
+                    arr1:[window],
+                    arr2:[{}],
+                    expect:false
+                },{
+                    arr1:[undefined,1],
+                    arr2:[null,2],
+                    expect:false
+                },{
+                    arr1:[new Object,new Object,new Object],
+                    arr2:[{},{},null],
+                    expect:false
+                },{
+                    arr1:null,
+                    arr2:null,
+                    expect:false
+                },{
+                    arr1:[],
+                    arr2:undefined,
+                    expect:false
+                },{
+                    arr1:"abc",
+                    arr2:"cba",
+                    expect:false
+                }];
+            
+    //使用for循环, 通过arraysSimilar函数验证以上数据是否相似，如相似显示“通过”,否则"不通过",所以大家要完成arraysSimilar函数,具体要求，详见任务要求。    
+            for(var i=0;i<cases.length;i++){
+                if(arraysSimilar(cases[i].arr1,cases[i].arr2)!==cases[i].expect) {
+                    document.write("不通过！case"+(i+1)+"不正确！arr1="+JSON.stringify(cases[i].arr1)+", arr2="+JSON.stringify(cases[i].arr2)+" 的判断结果不是"+cases[i].expect);
+                    return false;
+                }                
+            }
+            return true;
+            
+        }();
+    document.write("判定结果:"+(result?"通过":"不通过"));
+ 
+

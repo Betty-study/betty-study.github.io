@@ -1,0 +1,60 @@
+js:不改变原数组，删除或添加一个元素
+
+1.向数组的末尾添加一个元素	
+  /*
+         * param1 Array 
+         * param2 string ,number 
+         * return Array
+         */
+  function append(arr,item){
+ 	 return arr.concat(item); // concat(): 用于连接两个或多个数组,返回新数组
+  };
+  
+  var arr=[1,2,3,4];
+  append(arr,6); //output: [1,2,3,4,6]; 
+  arr://output:[1,2,3,4]
+  
+2.删除数组最后一个元素
+  function turncate(arr){
+  	return arr.slice(0,-1); // slice(): 从已有数组中返回指定元素个数，返回新数组； 语法：arrObject.slice(start,end);
+  }
+  
+  var arr=[1,2,3,4];
+  turncate(arr); //output: [1,2,3]; 
+  arr://output:[1,2,3,4]
+  
+3.在数组前添加一个元素
+  function preappend(arr,item){
+  	var newArr=arr.slice(0);
+  	 newArr.unshift(item); //unshift(): 在数组的前插入指定元素，并返回新数组的长度。
+  	 return newArr;
+  }
+  
+  var arr=[1,2,3,4];
+  preappend(arr，6); //output: [6，1,2,3，4]; 
+  arr://output:[1,2,3,4]
+
+4.删除数组第一元素
+  function curtail(arr){
+  	return arr.slice(1);
+  }
+  
+   var arr=[1,2,3,4];
+   curtail(arr); //output: 1,2,3]; 
+   arr://output:[1,2,3,4]
+   
+
+push, pop, shift, unshift的区别：
+push: 向数组末尾添加一个或多个元素，返回新的长度
+pop: 从数组末尾删除一个元素，返回这个元素
+shift：删除数组的第一个元素，返回这个元素
+unshift:向数组开头添加一个或多个元素，返回新的长度
+
+5. splice()
+定义：向数组中添加/删除项目，返回被删除的项目
+语法：arrayObj.splice(index,howmany,item1,...,itemN);
+index:必须，整数，指定被删除/添加元素的位置，使用负数从数组结尾处规定位置
+howmany:必须，指定要删除的数量，如果为0，不删除
+item1,..itemN:可选。指定要添加的新项目
+
+

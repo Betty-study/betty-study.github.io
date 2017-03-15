@@ -1,0 +1,171 @@
+setTimeout()方法用于在指定的毫秒数后调用函数或计算表达式。语法
+setTimeout(code,millisec)
+
+setTimeout(fun(), 2000); 加()立即执行fun表达式
+setTimeout(fun,2000); 不加(),2秒后执行fun表达式
+
+
+call()函数
+语法：call(thisObj[,arg1[,arg2[....[argN]]]]);
+定义：调用一个对像的方法，以另一个对象替换当前对象。
+
+e.g
+var obj={};
+obj.log=console.log;
+obj.log.call(console, this); //output: window;
+
+解析： obj.log.call(console, this) = console.log.call(console, this)
+输出切换的上下文console中的this, 即 window
+
+函数
+1.在Function类型里，函数是对象，函数名是指向函数对象的指针，没有重载
+2.当声明了多个重名函数，后面的函数会覆盖前面的函数。
+3.函数声明和函数表达式区别： 解析器在向执行环境中加载数据时，会先读取函数的声明。再读取函数的表达式
+e.g
+var a=1, y, z;
+function add(n){
+	return n=n+1;
+}
+y=add(a);
+function add(n){
+	return n=n+2;
+}
+z=add(a);
+
+console(y,z) //4 4;
+
+
+函数的调用方式
+直接调用
+实参处理：参数表达式运算结果作为实参传递给形参
+调用上下文：指向全局变量
+返回值: 1.没有执行到return返回undefined 
+	    2.执行到return返回return之后的值
+	    3.执行到return后没有值，返回undefined.
+
+对象方法调用
+实参处理：与直接调用模式一致
+调用上下文：指向方法所属的对象
+返回值：与直接调用模式一致
+
+构造函数调用
+实参处理：一般情况, 与直接调用模式一样； 如果构造函数没有形参，JS构造函数调用语法允许省略实参列表和圆括号的
+调用上下文：指向新创建的对象
+返回值：构造函数通常不使用return关键字，返回值就是新对象
+		如果构造函数显示的使用return语句返回了一个对象，那么调用表达式值就为这个对象
+
+间接调用
+实参处理：call()方法使用它自有的实参列表作为函数的参数
+         apply()方法要求以数组的形式传入参数
+调用上下文：允许显示的调用所需的this值， call()或apply()将传入的第一个参数作为this值
+
+valueOf()
+定义：valueOf()方法用于返回指定对象的原始值
+语法：Boolean.valueOf();
+
+var a=new Boolean(false);
+a.valueOf() //false
+
+
+
+6.分析以下代码在浏览器中运行的结果：
+
+var foo={n:1};                              
+(function(foo){                         (function(foo){//形参foo和实参foo指向同一个n值为1的内存空间
+											var foo;//变量声明会被提升到作用域顶端， 局部变优先级低于形参，可忽略					
+	console.log(foo.n);                     console.log(foo.n); //输出1 
+	foo.n=3;                      ====>     foo.n=3; //修改了形参foo和实参foo指向的n值为1的内存空间,n值变为3
+	var foo={n:2};                          foo={n:2} //形参foo指向一个n值为2的新的内存空间
+	console.log(foo.n);						console.log(foo.n)	//输出2									
+})(foo);								})(foo);				
+
+console.log(foo.n);//1,2,3              console.log(foo.n) //实参foo还是指向原来的内存空间，n值被修改为3
+
+
+
+函数声明的优先级高于变量声明， 遇到同名变量会被忽略。
+局部变量优先级低于形参
+
+7. 回调的运行机制。
+      被回调的函数会被放在event loop里，等待线程里的任务执行完后才执行event loop里面的代码
+ 	
+8. js是运行在单线程环境中的，setTimeout作用是规定在指定时间后将事件加入执行队列。而加入的前提是当前队列里的任务都执行完了
+  function foo(){
+	console.log('first');
+    setTimeout(function(){console.log('second')},5)
+  }
+  for(var i=0;i<499;i++){
+  	foo();
+  }
+  
+  output: 首先输出499个'first'， 然后全部输出'second';
+  
+9.引用类型和基本类型
+  基本类型就是简单的数据段
+ 引用类型值是保存在内存中的，Js是不能直接访问内存，所以对于引用类型，操作的不是实际的对象而是对象的引用。
+ 
+ 引用类型
+ 1）动态属性
+ 	引用类型可以动态添加属性,基本类型不可以，虽然不会报错
+ 	var obj=new Object();
+ 	obj.name='betty';
+ 	
+ 	console.log(obj.name) //betty	
+ 	
+ 	
+ 2）复制值
+       引用类型复制完成后的新值和之前的值都是引用同一个对象，所以之前的值改变也会影响复制后的值
+    
+    var obj=new Object();
+    obj.name='betty';
+    
+    var obj2=obj;
+    console.log(obj2); //betty
+    
+    obj.name='betty2'; 
+    
+    console.log(obj2.name) //betty2
+    
+    
+    —————————————————
+    |				|
+    |				|
+    
+       
+ 3）函数传参
+    JS中 函数传参都是按值传递的
+    function setName(obj) { 
+	    obj.name = 'zjzhome'; 
+	    obj = new Object();
+	    obj.name = 'zjz' 
+	}
+	var person = new Object()
+	setName(person)
+	console.log(person.name) // zjzhome 
+    person的值并没有因为obj的修改而改变，说明不是按引用传递的。如果是按引用传递的，obj和person指向同一个对象，当obj改变，person也会改变。
+ 
+
+
+10.对象分两种：一种是js内置对象，一种是宿主对象如window,Dom等
+   1)js内置对象：
+     Arguments -> 函数参数集合
+     Array	   -> 数组对象
+     Boolean   -> 布尔对象
+     Date	   -> 日期对象
+     Error     -> 异常对象
+     Function  -> 函数构造器
+     Math	   -> 数学对象
+     Number    -> 数值对象
+     Object    -> 基本对象
+     RegExp    -> 正则表达式对象
+     String    -> 字符串对象
+     
+11. RegExp 对象有三个方法：
+	1)test():用来检测一个字符串中是否匹配某个正则表达式，如果匹配返回true,否则返回false
+	2)exec():用来检索字符串中与正则表达式匹配的值。返回一个数组，其中存放匹配的结果，如果未找到匹配的值则返回null
+	3)compile():可以在脚步执行的过程中编译正则表达式。也可以改变已有的表达式
+
+
+
+
+
