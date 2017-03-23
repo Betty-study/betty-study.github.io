@@ -58,3 +58,23 @@ howmany:必须，指定要删除的数量，如果为0，不删除
 item1,..itemN:可选。指定要添加的新项目
 
 
+数组去重
+1.
+Array.prototype.uniq = function () {
+    var hasNaN=function(e){
+        return (e!==e)?true :false
+    };
+    for(var i=0,l=this.length;i<l;i++){
+        for(var j=i+1;j<l;j++){
+            if((hasNaN(this[i]) && hasNaN(this[j])) || (this[i]===this[j])){
+                this.splice(j,1);
+                l--;
+                j--;
+            }
+        }
+    }
+    return this;
+}
+
+
+

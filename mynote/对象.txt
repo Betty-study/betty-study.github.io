@@ -115,3 +115,6 @@ Object.defineProperty(peron,'type',{
 });
 
 Object.Keys(person);//['name'] 没有type 原因：enumerable为false，是不可枚举的
+
+
+判断对象中的属性是否存在： property in object; 
