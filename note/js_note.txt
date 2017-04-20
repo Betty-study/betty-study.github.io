@@ -1,0 +1,163 @@
+语法和数据类型
+
+undefined
+=========================================
+1)已经声明但是未被赋值的变量，值会被设定为undefined,调用未声明或未赋值的变量报refernceError;
+e.g
+var a; // a的值是undefined;
+console.log(b); //Uncaught ReferenceError: b is not defined
+
+2)利用undefined来判断变量是否被赋值。
+e.g
+var a;
+if(a==undefined){
+	dothis();
+} else {
+	dothat();
+}
+
+执行dothis语句；
+
+3）undefined值在布尔类型环境中会被当做false
+e.g
+var arr=[];
+if(!arr[0]){ //arr[0]未被赋值，所以值被设定为undefined; undefinded在布尔环境中为false; 
+	myFunc();  //myFunc()将会被执行
+}
+
+4）数值类型环境中undefined会被转化为NaN
+e.g
+var a
+a+2 //NaN; 
+
+注：当对一个null变量求职时，null在数值环境中转化为0；而布尔环境中为false
+e.g
+var a=null;
+a+2 //2;
+
+
+变量的作用域
+========================================================================
+变量声明提升:变量声明会被提升到该作用域的顶部，引用稍后声明的变量而不会引异常
+e.g
+1 console.log(x==undefined) //true
+  var a='hello';
+
+2.var a='globalVar';
+  (function(){
+  	console.log(a); //undefined;
+  	var a='localVal';
+  })()
+
+注:ECMAScript2015中， let(const)申明的变量将不会被提升到代码块的顶部
+e.g
+console.log(a); //referenceError;
+let a=1;
+
+函数提升：对于函数只有函数声明会被提升到顶部，而不包括函数表达式
+e.g
+
+1.
+fun(); // a
+//函数声明被提升至顶部
+function fun(){
+	console.log('a');
+}
+
+2.
+fun2(); //TypeError: this is not a function
+//这里只有fun2被提升至顶部，相当于一个未被赋值的变量，值被设定为undefined
+var fun2=function(){console.log('a')};
+
+常量const
+============================================================================
+用const声明的变量是一个只读的常量， 不能通过赋值改变其值，也不可以在脚本运行时重新声明。
+它必须被初始化为某个值。
+不能使用变量名或函数名相同的名字来命名常量
+e.g
+function f(){}
+const f=5; //Uncaught SyntaxError: Identifier 'f' has already been declared
+
+// THIS WILL CAUSE AN ERROR ALSO
+function f() {
+  const g = 5;
+  var g; //Uncaught SyntaxError: Identifier 'g' has already been declared
+
+  //statements
+}
+
+注：然而对象属性是不受保护的
+const MY_OBJECT={'key':'value'};
+MY_OBJECT.key='otherValue'
+
+
+False等效值
+==========================================================================
+false undefined null 0 NaN 空字符串("")
+
+注：不要混淆原始布尔值true 和 false 与布尔对象的值 true 和 false
+e.g
+var b=new Boolean(false);
+if(b) //this condition evaluates to true
+if(b==true) //this condition evaluates to false
+
+
+标签语句
+===========================================================================
+语法：
+label:
+	statement
+
+语义：lable的值可以是js的任何非保留字标识符。用label标识的语句可以是任何语句。
+e.g
+markLoop:
+while (theMark==true){
+	doSomthing;
+}
+
+
+异常处理语句
+===========================================================================
+用throw抛出一个异常并且用try...catch语句捕获处理它
+
+抛出语句(throw Statement)
+语法：
+throw expression
+可以抛出任意表达式而不是特定一种类型的表达式，例
+throw 'Error'  //String type
+throw 2  //Number type
+throw true //Boolean type
+thorw {toString:functio(){return 'object'}};
+
+小技巧：可以在抛出异常时声明一个对象。这样就可以在扑捉模块中查询到对象的属性
+e.g
+//create a object type UserExpection
+function UserExpection(message){
+	this.message=message;
+	this.name='UserExpection';
+}
+
+// Make the exception convert to a pretty string when used as
+// a string (e.g. by the error console)
+UserExection.prototype.toString=function(){
+	return this.name+': "'+this.message+ '"';
+}
+
+//creat a instance of the object type and throw it
+thow new UserExpection('value');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

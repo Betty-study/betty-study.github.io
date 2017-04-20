@@ -2,17 +2,50 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>HTML Workshop</title>
+		<title></title>
 	</head>
 	<body>
-		<h1>About Web Dev Workshop</h1>
-		<p>This is a <em>workshop</em> about we development</p>
-		<p>We will learn <strong>HTML</strong></p>
-		<ul>
-			<li>this is a list item</li>
-			<li>this is a list item</li>
-		</ul>
-		<img src="img/star.jpg" width="300" />
-		<a href="about.html">about me</a>
+		<script>			
+//			function getUrlParam(sUrl, sKey) {
+//			    var paramStr=sUrl.slice(sUrl.indexOf('?')+1, sUrl.indexOf('#'));
+//			    var paramArr=paramStr.split('&');
+//			    var keyObj={},arr=[];
+//			    
+//			    //{key:[1,2,3], test:4};
+//			    for(var i=0,len=paramArr.length; i < len;i++){
+//			        (function(i){
+//			            var k=paramArr[i].slice(0,paramArr[i].indexOf('=')),
+//			                v=paramArr[i].slice(paramArr[i].indexOf('=')+1); 
+//			            
+//			            if(keyObj[k]){
+//			            	var t=keyObj[k];
+//			            	keyObj[k]=[].concat(t,v);
+//			            } else {
+//							keyObj[k]=v;
+//			            }
+//			            
+//			        })(i)
+//			    }
+//			   if(sKey){
+//			   	return keyObj[sKey];
+//			   } else {
+//			   	return keyObj || '';
+//			   }
+//			}
+//
+//			getUrlParam('http://www.nowcoder.com?key=1&key=2&key=3&test=4#hehe', 'key');
+			
+			function namespace(oNamespace, sPackage) {
+			    var objArr=sPackage.split('.');
+				for(var i=0,len=objArr.length;i<len;i++){
+					if(!oNamespace.objArr[i]){
+						oNamespace.objArr[i]={};	
+					}
+			        oNamespace=oNamespace.objArr[i];
+			    }    
+			}
+			
+			namespace({a: {test: 1, b: 2}}, 'a.b.c.d')
+		</script>
 	</body>
 </html>
